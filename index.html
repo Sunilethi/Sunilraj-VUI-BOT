@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant</title>
+</head>
+<body>
+    <h1>Welcome to My Voice Assistant</h1>
+    <button onclick="startListening()">Ask me anything</button>
+    <p id="response">Your answer will appear here...</p>
+
+    <script>
+        function startListening() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const query = event.results[0][0].transcript;
+                document.getElementById("response").innerText = "You said: " + query;
+                askGPT(query);  // Send the query to GPT for processing
+            }
+        }
+
+        async function askGPT(prompt) {
+            const responseElement = document.getElementById("response");
+            responseElement.innerText = "Thinking...";
+
+            const apiKey = "YOUR_NEW_API_KEY"; // Add your OpenAI API Key here securely
+
+            const result = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + apiKey
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: prompt }]
+                })
+            });
+
+            const data = await result.json();
+            const reply = data.choices[0].message.content;
+            responseElement.innerText = reply;
+
+            speak(reply);
+        }
+
+        function speak(text) {
+            const speech = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</body>
+</html>
