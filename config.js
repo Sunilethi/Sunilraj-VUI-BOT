@@ -1,1 +1,1 @@
-const apiKey = "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";
+const apiKey = "sk-proj-";
